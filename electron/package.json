@@ -1,0 +1,9 @@
+{
+  "name": "agi-studio-launcher",
+  "main": "main.js",
+  "version": "1.0.0",
+  "devDependencies": { "electron": "^29.0.0" },
+  "scripts": {
+    "start": "electron ."
+  }
+}

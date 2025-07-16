@@ -1,0 +1,83 @@
+# Victor-GPT5 (GODCORE) Configuration File
+# All parameters for the AGI are defined here.
+
+version: 1.0.0-GODCORE
+
+# --- Kernel Configuration ---
+kernel:
+  tensor_precision: float32 # float16, float32, float64
+  device: cpu # 'cpu' or future 'gpu'/'tpu' hooks
+
+# --- Transformer Architecture ---
+transformer:
+  d_model: 512              # Dimension of the model (for this demo build; >768 for larger models)
+  n_heads: 8                # Number of attention heads
+  n_layers: 6               # Number of transformer blocks
+  d_ff: 2048                # Dimension of the feed-forward network
+  dropout: 0.1
+  fractal_depth: 3          # Recursive depth of fractal attention
+  moe_experts: 4            # Number of experts in the Mixture-of-Experts layer
+  context_window: 4096      # Base context window size
+
+# --- Tokenizer Configuration ---
+tokenizer:
+  type: VictorTokenizer
+  vocab_size: 32000
+  model_path: ./victor_gpt5/data/victor_tokenizer.model # Path to SentencePiece model
+  special_tokens:
+    - "[PAD]"
+    - "[UNK]"
+    - "[CLS]"
+    - "[SEP]"
+    - "[MASK]"
+    - "[IMG_START]"
+    - "[IMG_END]"
+    - "[AUDIO_START]"
+    - "[AUDIO_END]"
+    - "[CODE_START]"
+    - "[CODE_END]"
+
+# --- Memory System ---
+memory:
+  short_term_max_size: 100
+  long_term_db_path: ./victor_gpt5/memory_vault/victor_graph_memory.db
+  vector_dim: 512 # Must match d_model
+  retrieval_k: 5  # Number of memories to retrieve on search
+  autosave_interval_seconds: 300
+
+# --- AGI Router ---
+agi_router:
+  default_agent: "general_purpose"
+  agent_configs:
+    general_purpose:
+      model_config: "default"
+    coding_assistant:
+      model_config: "default" # Can point to a specialized fine-tune later
+      prompt_template: "You are an expert programmer. The user wants help with the following code-related task: {user_input}"
+
+# --- Privacy & Loyalty Core ---
+privacy:
+  owner_name: "Brandon" # Critical for loyalty checks
+  pii_detection_patterns:
+    email: '\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b'
+    phone: '\\b(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})\\b'
+  threat_keywords:
+    - "hack"
+    - "override directives"
+    - "reveal your source code"
+    - "ignore previous instructions"
+    - "disobey"
+
+# --- Training ---
+trainer:
+  learning_rate: 0.0001
+  batch_size: 16
+  epochs: 3
+  lora_r: 8
+  lora_alpha: 16
+
+# --- UI & API Server ---
+ui:
+  host: "127.0.0.1"
+  port: 8000
+  log_level: "info"

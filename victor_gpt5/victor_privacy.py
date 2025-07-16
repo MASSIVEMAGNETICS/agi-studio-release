@@ -1,6 +1,9 @@
 import re
 import hashlib
 from typing import Dict, Any, List
+import os
+from victor_transformer import Module, Linear
+from victor_kernel import OmegaTensor
 
 class VictorPrivacyCore:
     """

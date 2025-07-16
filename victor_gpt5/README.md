@@ -36,4 +36,49 @@ The system is composed of several key, independent-yet-integrated modules:
 ### 1. Installation
 
 ```bash
-pip install numpy sentencepiece fastapi "uvicorn[standard]" typer pyyaml
+pip install -r requirements.txt
+```
+
+### 2. First-time Setup
+
+Before running for the first time, the tokenizer needs to be trained on a sample corpus. A dummy corpus is provided, but you can replace it with your own data in `victor_gpt5/data/dummy_corpus.txt`.
+
+To train the tokenizer, run:
+
+```bash
+python -m victor_gpt5.victor_tokenizer
+```
+
+### 3. Running the AGI
+
+You can interact with Victor-GPT5 in several ways:
+
+**a) Interactive CLI:**
+
+```bash
+python -m victor_gpt5.victor_ui interact
+```
+
+**b) API Server:**
+
+```bash
+python -m victor_gpt5.victor_ui serve
+```
+
+This will start a FastAPI server at `http://127.0.0.1:8000`. You can access the API documentation at `http://127.0.0.1:8000/docs`.
+
+**c) Training:**
+
+To fine-tune the model on a new corpus, run:
+
+```bash
+python -m victor_gpt5.victor_ui train <path_to_corpus.txt>
+```
+
+**d) Evaluation:**
+
+To run the built-in evaluation suite, run:
+
+```bash
+python -m victor_gpt5.victor_ui evaluate
+```

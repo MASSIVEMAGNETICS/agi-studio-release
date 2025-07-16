@@ -6,6 +6,7 @@ from victor_kernel import OmegaTensor, cross_entropy_loss
 from victor_transformer import VictorFractalTransformer, LoraLayer # LoraLayer conceptual
 from victor_tokenizer import VictorTokenizer
 
+from victor_transformer import Module
 # Conceptual LoRA Layer to be injected
 class LoraLayer(Module):
     def __init__(self, original_layer, r, alpha):

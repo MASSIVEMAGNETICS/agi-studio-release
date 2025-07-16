@@ -1,0 +1,6 @@
+numpy
+sentencepiece
+fastapi
+"uvicorn[standard]"
+typer
+pyyaml

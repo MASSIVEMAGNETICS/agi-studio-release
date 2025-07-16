@@ -332,7 +332,7 @@ class Softmax(Op):
         # Reshape for broadcasting
         s_reshaped = np.expand_dims(s, axis=-1)
         # Jacobian
-        jacobian = np.diag_ промо(s.ravel()) - np.outer(s, s) # This is slow for large batches
+        # jacobian = np.diag(s.ravel()) - np.outer(s, s) # This is slow for large batches
         # Simplified for common case
         grad_a = s * (grad_out - (grad_out * s).sum(axis=self.axis, keepdims=True))
         return (grad_a,)

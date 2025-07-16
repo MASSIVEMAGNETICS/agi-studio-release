@@ -1,5 +1,6 @@
 import numpy as np
 from victor_kernel import OmegaTensor
+from typing import Any
 
 class BaseEncoder:
     """Base class for a modality-specific encoder."""

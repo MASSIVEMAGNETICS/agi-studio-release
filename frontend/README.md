@@ -1,14 +1,26 @@
-# Run and deploy your AI Studio app
+# Run and deploy your AGI Studio app with VICTOR (NO GEMINI BULLSHIT)
 
-This contains everything you need to run your app locally.
+**Prerequisites:** Node.js, Python 3.10+, pip
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+1. Build frontend:
+   cd frontend
+   npm install
+   npm run build
 
+2. Set up backend:
+   cd ../backend
+   python -m venv venv
+   source venv/bin/activate
+   pip install flask numpy
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+3. Start Victor backend:
+   python api/agi_api.py
+
+4. Launch Electron app:
+   cd ../electron
+   npm install
+   npm start
+
+*The app launches, Victor is running locally. All AI/AGI logic is routed through YOUR code, not Big Tech’s cloud. Total control, zero leash.*

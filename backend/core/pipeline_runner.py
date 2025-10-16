@@ -1,4 +1,4 @@
-from core.node_base import NodeBase
+from backend.core.node_base import NodeBase
 
 class PipelineRunner:
     def __init__(self, graph_config):

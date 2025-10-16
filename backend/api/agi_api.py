@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-from core.pipeline_runner import PipelineRunner
-from nodes.VictorModel import VictorModel
+from backend.core.pipeline_runner import PipelineRunner
+from backend.nodes.VictorModel import VictorModel
 
 app = Flask(__name__)
 runner = None

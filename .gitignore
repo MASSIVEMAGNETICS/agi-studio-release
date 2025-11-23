@@ -1,0 +1,354 @@
+# AGI Studio - Comprehensive .gitignore
+# Version: 2.0.0
+
+# ============================================================================
+# SECRETS & CREDENTIALS - NEVER COMMIT THESE!
+# ============================================================================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+vault/
+credentials/
+*.credentials
+
+# ============================================================================
+# PYTHON
+# ============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+.hypothesis/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# PyCharm
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# Spyder
+.spyderproject
+.spyproject
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Pytype static type analyzer
+.pytype/
+
+# Ruff
+.ruff_cache/
+
+# ============================================================================
+# NODE.JS / JAVASCRIPT / TYPESCRIPT
+# ============================================================================
+# Dependencies
+node_modules/
+jspm_packages/
+bower_components/
+
+# Build outputs
+dist/
+dist-ssr/
+*.local
+build/
+out/
+.next/
+.nuxt/
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Production
+production/
+
+# Misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Package manager locks (keep one, remove others based on your preference)
+# yarn.lock
+# pnpm-lock.yaml
+
+# ============================================================================
+# ELECTRON
+# ============================================================================
+electron/dist/
+electron/build/
+electron/*.js
+electron/*.js.map
+
+# ============================================================================
+# MACHINE LEARNING / AI
+# ============================================================================
+# Model files (large binary files)
+*.weights
+*.bin
+*.ckpt
+*.pt
+*.pth
+*.h5
+*.pb
+*.onnx
+*.tflite
+*.model
+*.pkl
+*.pickle
+*.joblib
+
+# Datasets
+data/
+datasets/
+*.csv
+*.tsv
+*.json.gz
+*.parquet
+
+# Training outputs
+runs/
+experiments/
+checkpoints/
+logs/
+tensorboard/
+mlruns/
+wandb/
+outputs/
+
+# Embeddings & vectors
+*.npy
+*.npz
+*.vec
+embeddings/
+vectors/
+
+# ============================================================================
+# DATABASES
+# ============================================================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+postgres_data/
+mysql_data/
+mongodb_data/
+
+# ============================================================================
+# DOCKER
+# ============================================================================
+# Don't ignore Dockerfiles, but ignore build artifacts
+docker-compose.override.yml
+.dockerignore
+
+# ============================================================================
+# OPERATING SYSTEM
+# ============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================================================
+# EDITORS & IDEs
+# ============================================================================
+# Vim
+*.swp
+*.swo
+*.swn
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# ============================================================================
+# TEMPORARY FILES
+# ============================================================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+
+# ============================================================================
+# DOCUMENTATION
+# ============================================================================
+# Build outputs
+docs/_build/
+docs/.doctrees/
+site/
+_site/
+
+# ============================================================================
+# CI/CD
+# ============================================================================
+.github/workflows/secrets.yml
+
+# ============================================================================
+# MONITORING & LOGGING
+# ============================================================================
+*.log
+logs/
+*.log.*
+*.out
+
+# ============================================================================
+# BACKUP FILES
+# ============================================================================
+*.backup
+*.bak
+*.gho
+*.ori
+*.orig
+*.tmp
+
+# ============================================================================
+# COMPRESSED FILES (optional - include if needed)
+# ============================================================================
+# *.zip
+# *.tar
+# *.tar.gz
+# *.rar
+# *.7z
+
+# ============================================================================
+# PROJECT SPECIFIC
+# ============================================================================
+# Victor-GPT5 model weights (too large for git)
+victor_gpt5/data/*.weights
+victor_gpt5/data/*.bin
+victor_gpt5/data/*.ckpt
+
+# User data
+user_data/
+conversations/
+memories/
+
+# Cache
+.cache/
+__pycache__/
+
+# Local configuration overrides
+config.local.json
+config.local.yaml
+
+# ============================================================================
+# KEEP THESE FILES
+# ============================================================================
+# Force include important files even if ignored by patterns above
+!.gitkeep
+!.github/
+!.vscode/settings.json.example

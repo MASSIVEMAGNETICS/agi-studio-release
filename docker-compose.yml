@@ -1,0 +1,217 @@
+version: '3.8'
+
+# AGI Studio - Docker Compose Configuration
+# Production-ready setup with all services
+
+services:
+  # ==========================================================================
+  # BACKEND API
+  # ==========================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agi-studio-backend
+    ports:
+      - "8000:8000"
+    environment:
+      # Application
+      - FLASK_ENV=production
+      - FLASK_DEBUG=False
+      # CRITICAL: Generate a secure secret key and set via environment variable
+      # DO NOT use the fallback in production! Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY environment variable is required}
+      
+      # Database
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-agi_studio}
+      - REDIS_URL=redis://redis:6379/0
+      
+      # Victor-GPT5
+      - VICTOR_MODEL_PATH=/app/victor_gpt5/data/victor_gpt5_godcore.weights
+      - VICTOR_BLOODLINE_PATH=/app/victor_gpt5/bloodline.txt
+      
+      # Security
+      # CRITICAL: Generate secure keys and set via environment variables
+      # Generate ENCRYPTION_KEY with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+      # Generate JWT_SECRET_KEY with: python -c "import secrets; print(secrets.token_hex(32))"
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:?ENCRYPTION_KEY environment variable is required}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?JWT_SECRET_KEY environment variable is required}
+      - ALLOWED_ORIGINS=http://localhost,http://localhost:80
+      
+      # Logging
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=json
+    volumes:
+      - ./victor_gpt5:/app/victor_gpt5:ro
+      - backend-logs:/var/log/agi-studio
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - agi-network
+
+  # ==========================================================================
+  # FRONTEND
+  # ==========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: agi-studio-frontend
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - agi-network
+
+  # ==========================================================================
+  # POSTGRESQL DATABASE
+  # ==========================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: agi-studio-postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-agi_studio}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agi-network
+
+  # ==========================================================================
+  # REDIS CACHE
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: agi-studio-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agi-network
+
+  # ==========================================================================
+  # QDRANT VECTOR DATABASE
+  # ==========================================================================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: agi-studio-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - agi-network
+
+  # ==========================================================================
+  # MONITORING - PROMETHEUS
+  # ==========================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: agi-studio-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+    networks:
+      - agi-network
+
+  # ==========================================================================
+  # MONITORING - GRAFANA
+  # ==========================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: agi-studio-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - agi-network
+
+# ==========================================================================
+# VOLUMES
+# ==========================================================================
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  qdrant-data:
+    driver: local
+  backend-logs:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+# ==========================================================================
+# NETWORKS
+# ==========================================================================
+networks:
+  agi-network:
+    driver: bridge

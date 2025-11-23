@@ -194,12 +194,19 @@ jobs:
           sarif_file: 'trivy-results.sarif'
       
       - name: Run Snyk Security Scan
+        # Only run if SNYK_TOKEN is configured
+        if: ${{ secrets.SNYK_TOKEN != '' }}
         uses: snyk/actions/python@master
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high
+      
+      - name: Warn if Snyk token not configured
+        if: ${{ secrets.SNYK_TOKEN == '' }}
+        run: |
+          echo "::warning::SNYK_TOKEN secret not configured - skipping Snyk scan"
+          echo "For production deployments, configure SNYK_TOKEN in repository secrets"
 
   # ============================================================================
   # BUILD

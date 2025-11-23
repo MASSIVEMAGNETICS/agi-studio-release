@@ -302,12 +302,18 @@ import base64
 class EncryptionManager:
     """Manage encryption for sensitive data"""
     
-    def __init__(self, master_key: str):
-        # Derive key from master key
+    def __init__(self, master_key: str, salt: bytes = None):
+        # CRITICAL: Use a unique salt per deployment
+        # Generate with: os.urandom(16)
+        # Store securely (e.g., in environment variable, vault, or secure config)
+        if salt is None:
+            raise ValueError("Salt must be provided - never use a default salt in production")
+        
+        # Derive key from master key using PBKDF2
         kdf = PBKDF2(
             algorithm=hashes.SHA256(),
             length=32,
-            salt=b'static-salt',  # Use unique salt per deployment
+            salt=salt,  # MUST be unique per deployment
             iterations=100000,
         )
         key = base64.urlsafe_b64encode(kdf.derive(master_key.encode()))
@@ -338,7 +344,15 @@ class EncryptionManager:
             f.write(data)
 
 # Usage
-encryption = EncryptionManager(os.environ['ENCRYPTION_KEY'])
+# WARNING: Never use static salts in production!
+# Generate a unique salt and store it securely:
+# import os
+# salt = os.urandom(16)
+# Store salt in environment variable or secure configuration
+encryption = EncryptionManager(
+    master_key=os.environ['ENCRYPTION_KEY'],
+    salt=os.environ['ENCRYPTION_SALT'].encode()  # Store salt securely
+)
 encrypted_memory = encryption.encrypt("sensitive user memory")
 ```
 

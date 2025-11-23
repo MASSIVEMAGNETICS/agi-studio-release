@@ -18,7 +18,9 @@ services:
       # Application
       - FLASK_ENV=production
       - FLASK_DEBUG=False
-      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      # CRITICAL: Generate a secure secret key and set via environment variable
+      # DO NOT use the fallback in production! Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY environment variable is required}
       
       # Database
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-agi_studio}
@@ -29,8 +31,11 @@ services:
       - VICTOR_BLOODLINE_PATH=/app/victor_gpt5/bloodline.txt
       
       # Security
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-generate-secure-key}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-me-in-production}
+      # CRITICAL: Generate secure keys and set via environment variables
+      # Generate ENCRYPTION_KEY with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+      # Generate JWT_SECRET_KEY with: python -c "import secrets; print(secrets.token_hex(32))"
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:?ENCRYPTION_KEY environment variable is required}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?JWT_SECRET_KEY environment variable is required}
       - ALLOWED_ORIGINS=http://localhost,http://localhost:80
       
       # Logging

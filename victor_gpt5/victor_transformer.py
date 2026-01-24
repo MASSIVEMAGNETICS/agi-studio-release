@@ -119,6 +119,7 @@ class FractalSelfAttention(Module):
                 # attn_scores is (B*n_heads, N, N)
                 # mask is (B, 1, N, N) -> need to expand for heads
                 head_mask = np.repeat(mask, self.n_heads, axis=0)
+                head_mask = head_mask.reshape(B * self.n_heads, N, N)
                 attn_scores.data[head_mask == 0] = -1e9
 
             attn_probs = softmax(attn_scores, axis=-1)

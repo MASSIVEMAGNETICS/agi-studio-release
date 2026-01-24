@@ -139,6 +139,8 @@ class OmegaTensor:
     def transpose(self, *axes):
         return Transpose(*axes)(self)
 
+    def __getitem__(self, idx):
+        return GetItem(idx)(self)
 
 # --- Basic Operations ---
 class Add(Op):
@@ -245,8 +247,19 @@ class MatMul(Op):
         return out
 
     def backward(self, grad_out: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        # Support broadcasting and multidimensional inputs
         grad_a = grad_out @ self.b.data.T
-        grad_b = self.a.data.T @ grad_out
+
+        # For grad_b, if inputs are > 2D, we likely need to contract over batch dimensions.
+        # This handles the common case where A=(Batch, ..., In) and B=(In, Out)
+        # We flatten A to (-1, In) and grad_out to (-1, Out)
+        if self.a.data.ndim > 2 and self.b.data.ndim == 2:
+            a_flat = self.a.data.reshape(-1, self.a.data.shape[-1])
+            grad_out_flat = grad_out.reshape(-1, grad_out.shape[-1])
+            grad_b = a_flat.T @ grad_out_flat
+        else:
+            grad_b = self.a.data.T @ grad_out
+
         return grad_a, grad_b
 
 class Sum(Op):
@@ -295,6 +308,22 @@ class Transpose(Op):
         inv_axes = np.argsort(self.axes)
         return (grad_out.transpose(*inv_axes),)
 
+class GetItem(Op):
+    def __init__(self, idx):
+        self.idx = idx
+
+    def __call__(self, a: OmegaTensor) -> OmegaTensor:
+        out = OmegaTensor(a.data[self.idx], a.requires_grad)
+        if a.requires_grad:
+            out.set_creator(self, a)
+        self.a_shape = a.shape
+        return out
+
+    def backward(self, grad_out: np.ndarray) -> Tuple[np.ndarray]:
+        grad = np.zeros(self.a_shape, dtype=grad_out.dtype)
+        grad[self.idx] = grad_out
+        return (grad,)
+
 # --- Activation Functions ---
 class ReLU(Op):
     def __call__(self, a: OmegaTensor) -> OmegaTensor:
@@ -332,7 +361,7 @@ class Softmax(Op):
         # Reshape for broadcasting
         s_reshaped = np.expand_dims(s, axis=-1)
         # Jacobian
-        jacobian = np.diag_ промо(s.ravel()) - np.outer(s, s) # This is slow for large batches
+        # jacobian = np.diag(s.ravel()) - np.outer(s, s) # This is slow for large batches
         # Simplified for common case
         grad_a = s * (grad_out - (grad_out * s).sum(axis=self.axis, keepdims=True))
         return (grad_a,)
